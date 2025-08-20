@@ -16,7 +16,7 @@ export default function AttendanceManagement() {
     }
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/attendance", {
+      const res = await axios.get("https://sree-apparels-ems.onrender.com/api/attendance", {
         params: { date, shift },
       });
       console.log("Attendance data:", res.data);
@@ -63,7 +63,7 @@ export default function AttendanceManagement() {
         status: attendance[s._id] || "Absent",
       }));
 
-      await axios.post("http://localhost:5000/api/attendance", payload);
+      await axios.post("https://sree-apparels-ems.onrender.com/api/attendance", payload);
 
       alert("✅ Attendance saved successfully!");
       loadAttendance(); // reload to reflect saved state
