@@ -96,6 +96,9 @@ export default function PieceTracking() {
 
                 {/* Filters */}
                 <div className="flex gap-6 mb-8 justify-center">
+                    <label className="block text-gray-700 font-semibold mb-2">
+                        Dispatched Status:
+                    </label>
                     <select
                         value={filters.isDispatched}
                         onChange={(e) =>
@@ -107,6 +110,9 @@ export default function PieceTracking() {
                         <option>Dispatched</option>
                         <option>Not Dispatched</option>
                     </select>
+                    <label className="block text-gray-700 font-semibold mb-2">
+                        Payment Status:
+                    </label>
 
                     <select
                         value={filters.paymentStatus}
@@ -116,9 +122,9 @@ export default function PieceTracking() {
                         className="border-2 border-pink-300 rounded-lg p-2 text-pink-700 font-semibold shadow focus:outline-none focus:ring-2 focus:ring-pink-400"
                     >
                         <option>All</option>
-                        <option>Paid</option>
+                        <option>Completed</option>
                         <option>Partial</option>
-                        <option>Unpaid</option>
+                        <option>Pending</option>
                     </select>
 
                     <button
@@ -139,8 +145,8 @@ export default function PieceTracking() {
                                 <th className="border p-3 text-lg font-bold text-blue-700">Quantity</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Received</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Dispatched</th>
-                                <th className="border p-3 text-lg font-bold text-blue-700">Amount</th>
-                                <th className="border p-3 text-lg font-bold text-blue-700">Paid</th>
+                                <th className="border p-3 text-lg font-bold text-blue-700">Total Amount</th>
+                                <th className="border p-3 text-lg font-bold text-blue-700">Received Yet</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Actions</th>
                             </tr>
                         </thead>

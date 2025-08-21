@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StaffManagement from "./pages/StaffManagement";
 import AttendanceManagement from "./pages/AttendanceManagement";
 import PieceTracking from "./pages/PieceTracking";
+import StitchingManagement from "./pages/StitchingManagement";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
         <Routes>
           <Route path="/staff" element={<StaffManagement />} />
           <Route path="/attendance" element={<AttendanceManagement />} />
-          <Route path="/stitching" element={<h1>Stitching Dashboard</h1>} />
+          <Route path="/stitching" element={<StitchingManagement/>} />
           <Route path="/pieces" element={<PieceTracking/>} />
           <Route path="/salary" element={<h1>Salary Dashboard</h1>} />
           <Route path="/analysis" element={<h1>Analysis Dashboard</h1>} />
