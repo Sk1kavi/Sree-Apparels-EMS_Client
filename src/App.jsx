@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import StaffManagement from "./pages/StaffManagement";
 import AttendanceManagement from "./pages/AttendanceManagement";
+import PieceTracking from "./pages/PieceTracking";
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
           <Route path="/staff" element={<StaffManagement />} />
           <Route path="/attendance" element={<AttendanceManagement />} />
           <Route path="/stitching" element={<h1>Stitching Dashboard</h1>} />
-          <Route path="/pieces" element={<h1>Piece Tracking Dashboard</h1>} />
+          <Route path="/pieces" element={<PieceTracking/>} />
           <Route path="/salary" element={<h1>Salary Dashboard</h1>} />
           <Route path="/analysis" element={<h1>Analysis Dashboard</h1>} />
           <Route path="/" element={<h1>Welcome to Sree Apparels EMS</h1>} />
