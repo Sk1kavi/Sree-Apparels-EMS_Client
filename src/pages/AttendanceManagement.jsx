@@ -7,6 +7,7 @@ export default function AttendanceManagement() {
   const [staff, setStaff] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
 
   // ✅ Load attendance/staff whenever called
   const loadAttendance = async () => {
@@ -28,8 +29,10 @@ export default function AttendanceManagement() {
         });
         setAttendance(mapped);
         setStaff(res.data.data.map((r) => r.staffId));
+        setIsStaff(false);
       } else if (res.data.type === "staff") {
         // Case 2: No attendance yet → mark everyone Absent
+        setIsStaff(true);
         const mapped = {};
         res.data.data.forEach((s) => {
           mapped[s._id] = "Absent";
@@ -156,7 +159,7 @@ export default function AttendanceManagement() {
           </div>
 
           {/* Submit Button */}
-          {staff.length > 0 && (
+          {staff.length > 0 && isStaff==true && (
             <div className="mt-8 text-center">
               <button
                 onClick={submitAttendance}
