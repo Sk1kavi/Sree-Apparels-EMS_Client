@@ -3,6 +3,7 @@ import StaffManagement from "./pages/StaffManagement";
 import AttendanceManagement from "./pages/AttendanceManagement";
 import PieceTracking from "./pages/PieceTracking";
 import StitchingManagement from "./pages/StitchingManagement";
+import Home from "./pages/Home";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <Route path="/pieces" element={<PieceTracking/>} />
           <Route path="/salary" element={<h1>Salary Dashboard</h1>} />
           <Route path="/analysis" element={<h1>Analysis Dashboard</h1>} />
-          <Route path="/" element={<h1>Welcome to Sree Apparels EMS</h1>} />
+          <Route path="/" element={<Home/>} />
         </Routes>
       </div>
     </div>
