@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000/api/salary/summary";
+const API = "https://sree-apparels-ems.onrender.com/api/salary/summary";
 // Default to current YYYY-MM
 const now = new Date();
 const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
