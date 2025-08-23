@@ -4,6 +4,7 @@ import AttendanceManagement from "./pages/AttendanceManagement";
 import PieceTracking from "./pages/PieceTracking";
 import StitchingManagement from "./pages/StitchingManagement";
 import Home from "./pages/Home";
+import SalaryManagement from "./pages/SalaryManagement";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
           <Route path="/attendance" element={<AttendanceManagement />} />
           <Route path="/stitching" element={<StitchingManagement/>} />
           <Route path="/pieces" element={<PieceTracking/>} />
-          <Route path="/salary" element={<h1>Salary Dashboard</h1>} />
+          <Route path="/salary" element={<SalaryManagement/>} />
           <Route path="/analysis" element={<h1>Analysis Dashboard</h1>} />
           <Route path="/" element={<Home/>} />
         </Routes>
