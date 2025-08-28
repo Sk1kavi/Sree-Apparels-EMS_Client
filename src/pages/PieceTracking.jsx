@@ -3,7 +3,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const API_BASE = "http://localhost:5000/api/pieces";
+const API_BASE = "https://sree-apparels-ems.onrender.com/api/pieces";
 
 export default function PieceTracking() {
   const [trunks, setTrunks] = useState([]);
