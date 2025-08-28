@@ -20,7 +20,7 @@ function App() {
         <Link to="/stitching" className="hover:bg-gray-700 p-2 rounded">🧵 Stitching</Link>
         <Link to="/pieces" className="hover:bg-gray-700 p-2 rounded">📦 Piece Tracking</Link>
         <Link to="/salary" className="hover:bg-gray-700 p-2 rounded">💰 Salary</Link>
-        <Link to="/analysis" className="hover:bg-gray-700 p-2 rounded">📊 Analysis</Link>
+        {/*<Link to="/analysis" className="hover:bg-gray-700 p-2 rounded">📊 Analysis</Link>*/}
       </nav>
     </div>
 

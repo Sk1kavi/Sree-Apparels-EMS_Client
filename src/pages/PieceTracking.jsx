@@ -140,7 +140,7 @@ export default function PieceTracking() {
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="bg-gradient-to-r from-blue-100 via-pink-100 to-blue-50">
-                                <th className="border p-3 text-lg font-bold text-blue-700">Trunk No</th>
+                                <th className="border p-3 text-lg font-bold text-blue-700">Bundle No</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Item Type</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Quantity</th>
                                 <th className="border p-3 text-lg font-bold text-blue-700">Received</th>
