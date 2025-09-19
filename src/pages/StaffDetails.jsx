@@ -31,10 +31,12 @@ export default function StaffDetails({ staffId, goBack }) {
         name: "",
         phone: "",
         role: "Tailor",
-        bankAccount: "",
-        address: "",
+        state: "",
+        district: "",
+        city: "",
+        pincode: "",
         imageUrl: ""
-    });
+        });
     const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
@@ -126,20 +128,31 @@ export default function StaffDetails({ staffId, goBack }) {
         }
     };
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        let imageUrl = formData.imageUrl;
-        if (imageFile) imageUrl = await uploadImage();
+   const handleUpdate = async (e) => {
+    e.preventDefault();
+    let imageUrl = formData.imageUrl;
+    if (imageFile) imageUrl = await uploadImage();
 
-        const payload = { ...formData, imageUrl };
+    const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        role: formData.role,
+        address: {
+        state: formData.state,
+        district: formData.district,
+        city: formData.city,
+        pincode: formData.pincode,
+        },
+        imageUrl,
+    };
 
-        try {
-            await axios.put(`${BASE_URL}/staff/${staffId}`, payload);
-            setIsEditing(false);
-            fetchStaffDetails(); // refresh
-        } catch (err) {
-            console.error(err);
-        }
+    try {
+        await axios.put(`${BASE_URL}/staff/${staffId}`, payload);
+        setIsEditing(false);
+        fetchStaffDetails(); // refresh
+    } catch (err) {
+        console.error("Update Staff error:", err.response?.data || err.message);
+    }
     };
 
     if (!staff) return <div className="text-center mt-12">Loading...</div>;
@@ -147,57 +160,129 @@ export default function StaffDetails({ staffId, goBack }) {
     // 🔹 Show Edit Form
     if (isEditing) {
         return (
-            <form onSubmit={handleUpdate} className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-lg mx-auto mt-12">
-                <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Edit Staff</h2>
+            <form
+                onSubmit={handleUpdate}
+                className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-lg mx-auto mt-12"
+                >
+                <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">
+                    Edit Staff
+                </h2>
                 <div className="space-y-4">
+                    {/* Name */}
+                    <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Name
+                    </label>
                     <input
+                        id="name"
                         type="text"
-                        placeholder="Name"
+                        placeholder="Enter full name"
                         value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="border p-3 w-full rounded-lg"
                         required
                     />
+                    </div>
+
+                    {/* Phone */}
+                    <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone
+                    </label>
                     <input
+                        id="phone"
                         type="text"
-                        placeholder="Phone"
+                        placeholder="Enter phone number"
                         value={formData.phone}
-                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="border p-3 w-full rounded-lg"
                     />
+                    </div>
+
+                    {/* Role */}
+                    <div>
+                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                        Role
+                    </label>
                     <select
+                        id="role"
                         value={formData.role}
-                        onChange={e => setFormData({ ...formData, role: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         className="border p-3 w-full rounded-lg"
                     >
                         <option value="Tailor">Tailor</option>
                         <option value="Helper">Helper</option>
                     </select>
-                    <input
+                    </div>
+
+                    {/* Address fields */}
+                    <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <input
                         type="text"
-                        placeholder="Bank Account"
-                        value={formData.bankAccount}
-                        onChange={e => setFormData({ ...formData, bankAccount: e.target.value })}
+                        placeholder="State"
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                         className="border p-3 w-full rounded-lg"
-                    />
-                    <input
+                        />
+                        <input
                         type="text"
-                        placeholder="Address"
-                        value={formData.address}
-                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        placeholder="District"
+                        value={formData.district}
+                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                         className="border p-3 w-full rounded-lg"
-                    />
+                        />
+                        <input
+                        type="text"
+                        placeholder="City"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                        />
+                        <input
+                        type="text"
+                        placeholder="Pincode"
+                        value={formData.pincode}
+                        onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                        />
+                    </div>
+                    </div>
+
+                    {/* Image */}
+                    <div>
+                    <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+                        Profile Image
+                    </label>
                     <input
+                        id="image"
                         type="file"
-                        onChange={e => setImageFile(e.target.files[0])}
+                        onChange={(e) => setImageFile(e.target.files[0])}
                         className="border p-3 w-full rounded-lg"
                     />
+                    </div>
                 </div>
+
+                {/* Buttons */}
                 <div className="flex justify-between mt-8">
-                    <button type="submit" className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow">Update Staff</button>
-                    <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-400 text-white rounded-lg">Cancel</button>
+                    <button
+                    type="submit"
+                    className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow"
+                    >
+                    Update Staff
+                    </button>
+                    <button
+                    type="button"
+                    onClick={() => setView("list")}
+                    className="px-6 py-2 bg-gray-400 text-white rounded-lg"
+                    >
+                    Cancel
+                    </button>
                 </div>
-            </form>
+                </form>
         );
     }
 
@@ -223,9 +308,17 @@ export default function StaffDetails({ staffId, goBack }) {
                 <p className="text-indigo-500 font-medium mb-4">{staff.role}</p>
                 <div className="space-y-2 text-gray-700 text-lg text-left">
                     <p>📞 <span className="font-semibold">{staff.phone}</span></p>
-                    <p>🏠 <span className="font-semibold">{staff.address}</span></p>
-                    <p>🏦 <span className="font-semibold">{staff.bankAccount}</span></p>
-                </div>
+
+                    {/* Address */}
+                    <p>🏠 
+                        <span className="font-semibold">
+                        {[staff.address?.city, staff.address?.district, staff.address?.state, staff.address?.pincode]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </span>
+                    </p>
+                    </div>
+
                 <div className="flex justify-center gap-4 mt-8">
                     <button
                         onClick={() => setIsEditing(true)}
