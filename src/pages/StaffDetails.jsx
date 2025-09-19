@@ -1,20 +1,142 @@
 // StaffDetails.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer
+} from "recharts";
+import { format, parseISO, getISOWeek } from "date-fns";
 
-const BASE_URL = "https://sree-apparels-ems.onrender.com/api/staff";
+const BASE_URL = "https://sree-apparels-ems.onrender.com/api";
 
 export default function StaffDetails({ staffId, goBack }) {
     const [staff, setStaff] = useState(null);
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [viewMode, setViewMode] = useState("Daily"); // Daily | Weekly | Monthly
+    const [salaryData, setSalaryData] = useState([]);
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [stitchingData, setStitchingData] = useState([]);
+    const [totals, setTotals] = useState({ salary: 0, presentShifts: 0, absentShifts: 0, stitchedCount: 0 });
+
+    // 🔹 Edit state
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        phone: "",
+        role: "Tailor",
+        bankAccount: "",
+        address: "",
+        imageUrl: ""
+    });
+    const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
         fetchStaffDetails();
     }, [staffId]);
 
+    useEffect(() => {
+        if (staff) fetchAnalysis();
+    }, [staff, year, month, viewMode]);
+
     const fetchStaffDetails = async () => {
         try {
-            const res = await axios.get(`${BASE_URL}/${staffId}`);
+            const res = await axios.get(`${BASE_URL}/staff/${staffId}`);
             setStaff(res.data);
+            setFormData(res.data); // preload edit form
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const fetchAnalysis = async () => {
+        try {
+            const monthStr = month.toString().padStart(2, "0");
+
+            // Salary
+            const salaryRes = await axios.get(`${BASE_URL}/analysis/salary/${staffId}?year=${year}&month=${monthStr}`);
+            console.log(salaryRes.data);
+            setSalaryData(salaryRes.data);
+            const salaryTotal = salaryRes.data.reduce((acc, curr) => acc + (curr.salary || 0), 0);
+
+            // Attendance
+            const attendanceRes = await axios.get(`${BASE_URL}/analysis/attendance/${staffId}?year=${year}&month=${monthStr}`);
+            let processedAttendance = aggregateData(attendanceRes.data, viewMode, "date", ["presentShifts", "absentShifts"]);
+            setAttendanceData(processedAttendance);
+
+            // Stitching (tailors only)
+            let processedStitching = [];
+            if (staff.role === "Tailor") {
+                const stitchingRes = await axios.get(`${BASE_URL}/analysis/stitching/${staffId}?year=${year}&month=${monthStr}`);
+                processedStitching = aggregateData(stitchingRes.data, viewMode, "date", ["stitchedCount"]);
+                setStitchingData(processedStitching);
+            }
+
+            // Totals
+            const present = processedAttendance.reduce((acc, cur) => acc + (cur.presentShifts || 0), 0);
+            const absent = processedAttendance.reduce((acc, cur) => acc + (cur.absentShifts || 0), 0);
+            const stitched = processedStitching.reduce((acc, cur) => acc + (cur.stitchedCount || 0), 0);
+
+            setTotals({ salary: salaryTotal, presentShifts: present, absentShifts: absent, stitchedCount: stitched });
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // Utility to aggregate daily data into weekly or monthly
+    const aggregateData = (data, mode, key, valueKeys) => {
+        if (mode === "Daily") return data;
+
+        const grouped = {};
+        data.forEach(d => {
+            let groupKey;
+            const dateObj = parseISO(d[key]);
+            if (mode === "Weekly") groupKey = `Week ${getISOWeek(dateObj)}`;
+            else if (mode === "Monthly") groupKey = format(dateObj, "MMMM");
+
+            if (!grouped[groupKey]) {
+                grouped[groupKey] = {};
+                valueKeys.forEach(k => grouped[groupKey][k] = 0);
+            }
+            valueKeys.forEach(k => grouped[groupKey][k] += d[k] || 0);
+        });
+
+        return Object.keys(grouped).sort().map(k => ({ ...grouped[k], [key]: k }));
+    };
+
+    const uploadImage = async () => {
+        if (!imageFile) return "";
+        const fd = new FormData();
+        fd.append("image", imageFile);
+        try {
+            const res = await axios.post(`${BASE_URL}/staff/upload`, fd, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return res.data.imageUrl;
+        } catch (err) {
+            console.error(err);
+            return "";
+        }
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        let imageUrl = formData.imageUrl;
+        if (imageFile) imageUrl = await uploadImage();
+
+        const payload = { ...formData, imageUrl };
+
+        try {
+            await axios.put(`${BASE_URL}/staff/${staffId}`, payload);
+            setIsEditing(false);
+            fetchStaffDetails(); // refresh
         } catch (err) {
             console.error(err);
         }
@@ -22,6 +144,64 @@ export default function StaffDetails({ staffId, goBack }) {
 
     if (!staff) return <div className="text-center mt-12">Loading...</div>;
 
+    // 🔹 Show Edit Form
+    if (isEditing) {
+        return (
+            <form onSubmit={handleUpdate} className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-lg mx-auto mt-12">
+                <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Edit Staff</h2>
+                <div className="space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder="Phone"
+                        value={formData.phone}
+                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                    />
+                    <select
+                        value={formData.role}
+                        onChange={e => setFormData({ ...formData, role: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                    >
+                        <option value="Tailor">Tailor</option>
+                        <option value="Helper">Helper</option>
+                    </select>
+                    <input
+                        type="text"
+                        placeholder="Bank Account"
+                        value={formData.bankAccount}
+                        onChange={e => setFormData({ ...formData, bankAccount: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Address"
+                        value={formData.address}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        className="border p-3 w-full rounded-lg"
+                    />
+                    <input
+                        type="file"
+                        onChange={e => setImageFile(e.target.files[0])}
+                        className="border p-3 w-full rounded-lg"
+                    />
+                </div>
+                <div className="flex justify-between mt-8">
+                    <button type="submit" className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow">Update Staff</button>
+                    <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-400 text-white rounded-lg">Cancel</button>
+                </div>
+            </form>
+        );
+    }
+
+    // 🔹 Show Details + Charts
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 p-8 flex flex-col items-center gap-12">
             {/* === Staff Info Section === */}
@@ -46,22 +226,108 @@ export default function StaffDetails({ staffId, goBack }) {
                     <p>🏠 <span className="font-semibold">{staff.address}</span></p>
                     <p>🏦 <span className="font-semibold">{staff.bankAccount}</span></p>
                 </div>
-                <button
-                    onClick={goBack}
-                    className="mt-8 px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow transition"
-                >
-                    Back
-                </button>
+                <div className="flex justify-center gap-4 mt-8">
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-white font-semibold rounded-lg shadow"
+                    >
+                        Edit
+                    </button>
+                    <button
+                        onClick={async () => {
+                            if (window.confirm("Delete this staff?")) {
+                                await axios.delete(`${BASE_URL}/staff/${staffId}`);
+                                goBack(); // return to list
+                            }
+                        }}
+                        className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        onClick={goBack}
+                        className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow"
+                    >
+                        Back
+                    </button>
+                </div>
             </div>
 
             {/* === Analysis / Chart Section === */}
-            <div className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-4xl w-full">
-                <h3 className="text-xl font-bold text-indigo-700 mb-4 text-center">
-                    Performance & Attendance Analysis
-                </h3>
-                <div className="h-64 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-400 font-semibold">
-                    Chart will appear here
+            <div className="space-y-8 w-full max-w-4xl">
+                {/* === Filters === */}
+                <div className="flex gap-4 justify-center mb-4">
+                    <select value={year} onChange={e => setYear(Number(e.target.value))} className="p-2 border rounded">
+                        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+                    <select value={month} onChange={e => setMonth(Number(e.target.value))} className="p-2 border rounded">
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                            <option key={m} value={m}>{m}</option>
+                        ))}
+                    </select>
+                    <select value={viewMode} onChange={e => setViewMode(e.target.value)} className="p-2 border rounded">
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
                 </div>
+
+                {/* === Salary Chart === */}
+                <div className="bg-white border rounded-lg shadow p-4">
+                    <h3 className="text-lg font-bold text-indigo-700 mb-1 text-center">Salary</h3>
+                    <p className="text-center text-gray-600 mb-2">Total: ₹{totals.salary}</p>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={salaryData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" />
+                            <YAxis />
+                            <Tooltip formatter={(value) => `₹${value}`} />
+                            <Legend />
+                            <Bar dataKey="salary" fill="#4f46e5" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* === Attendance Chart === */}
+                <div className="bg-white border rounded-lg shadow p-4">
+                    <h3 className="text-lg font-bold text-indigo-700 mb-1 text-center">Attendance</h3>
+                    <p className="text-center text-gray-600 mb-2">
+                        Present: {totals.presentShifts}, Absent: {totals.absentShifts}
+                    </p>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={attendanceData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="presentShifts" fill="#10b981" name="Present Shifts" />
+                            <Bar dataKey="absentShifts" fill="#ef4444" name="Absent Shifts" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* === Stitching Chart (Tailors Only) === */}
+                {staff.role === "Tailor" && (
+                    <div className="bg-white border rounded-lg shadow p-4">
+                        <h3 className="text-lg font-bold text-indigo-700 mb-1 text-center">Stitching Performance</h3>
+                        <p className="text-center text-gray-600 mb-2">
+                            Total Pieces Stitched: {totals.stitchedCount}
+                        </p>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={stitchingData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="stitchedCount" fill="#f59e0b" name="Pieces Stitched" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
             </div>
         </div>
     );

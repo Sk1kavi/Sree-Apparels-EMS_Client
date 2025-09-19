@@ -78,10 +78,23 @@ export default function SalaryManagement() {
           onClick={async () => {
             if (!data) return alert("Apply first to calculate salary.");
             try {
+              const tailorsWithId = data.tailors.map(t => ({
+                staffId: t._id,  
+                name: t.name,
+                salary: t.salary,
+                totalPieces: t.totalPieces
+              }));
+              const helpersWithId = data.helpers.map(h => ({
+                staffId: h._id,  
+                name: h.name,
+                salary: h.salary,
+                presentShifts: h.presentShifts
+              }));
+
               await axios.post(`${API}/finalize`, {
                 month,
-                tailors: data.tailors,
-                helpers: data.helpers,
+                tailors: tailorsWithId,
+                helpers: helpersWithId,
                 totals: data.totals,
                 rates: data.rates,
               });
@@ -112,7 +125,7 @@ export default function SalaryManagement() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {data.tailors.map(t => (
-                <div key={t._id} className="bg-white rounded-2xl shadow-lg p-5 flex items-center gap-5 border border-indigo-100 hover:shadow-xl transition">
+                <div key={t.staffId} className="bg-white rounded-2xl shadow-lg p-5 flex items-center gap-5 border border-indigo-100 hover:shadow-xl transition">
                   {t.imageUrl ? (
                     <img
                       src={t.imageUrl}
@@ -141,7 +154,7 @@ export default function SalaryManagement() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {data.helpers.map(h => (
-                <div key={h._id} className="bg-white rounded-2xl shadow-lg p-5 flex items-center gap-5 border border-purple-100 hover:shadow-xl transition">
+                <div key={h.staffId} className="bg-white rounded-2xl shadow-lg p-5 flex items-center gap-5 border border-purple-100 hover:shadow-xl transition">
                   {h.imageUrl ? (
                     <img
                       src={h.imageUrl}
