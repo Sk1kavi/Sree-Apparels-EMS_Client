@@ -103,11 +103,15 @@ export default function StaffManagement() {
                 <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">
                     Add Staff
                 </h2>
+
                 <div className="space-y-4">
                     {/* Name */}
                     <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                        Name
+                    <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                        Name <span className="text-red-500">*</span>
                     </label>
                     <input
                         id="name"
@@ -122,22 +126,31 @@ export default function StaffManagement() {
 
                     {/* Phone */}
                     <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
+                    <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                        Phone <span className="text-red-500">*</span>
                     </label>
                     <input
                         id="phone"
-                        type="text"
+                        type="tel"
                         placeholder="Enter phone number"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="border p-3 w-full rounded-lg"
+                        required
+                        pattern="[0-9]{10}"
+                        title="Phone number must be exactly 10 digits"
                     />
                     </div>
 
                     {/* Role */}
                     <div>
-                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                        htmlFor="role"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                         Role
                     </label>
                     <select
@@ -154,7 +167,7 @@ export default function StaffManagement() {
                     {/* Address fields */}
                     <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address
+                        Address <span className="text-red-500">*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-4">
                         <input
@@ -163,13 +176,17 @@ export default function StaffManagement() {
                         value={formData.state}
                         onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                         className="border p-3 w-full rounded-lg"
+                        required
                         />
                         <input
                         type="text"
                         placeholder="District"
                         value={formData.district}
-                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                        onChange={(e) =>
+                            setFormData({ ...formData, district: e.target.value })
+                        }
                         className="border p-3 w-full rounded-lg"
+                        required
                         />
                         <input
                         type="text"
@@ -177,20 +194,27 @@ export default function StaffManagement() {
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         className="border p-3 w-full rounded-lg"
+                        required
                         />
                         <input
                         type="text"
                         placeholder="Pincode"
                         value={formData.pincode}
-                        onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                        onChange={(e) =>
+                            setFormData({ ...formData, pincode: e.target.value })
+                        }
                         className="border p-3 w-full rounded-lg"
+                        required
                         />
                     </div>
                     </div>
 
                     {/* Image */}
                     <div>
-                    <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                        htmlFor="image"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                         Profile Image
                     </label>
                     <input
@@ -219,6 +243,7 @@ export default function StaffManagement() {
                     </button>
                 </div>
                 </form>
+
         );
     }
 
