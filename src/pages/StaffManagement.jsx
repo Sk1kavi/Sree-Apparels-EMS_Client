@@ -14,10 +14,13 @@ export default function StaffManagement() {
         name: "",
         phone: "",
         role: "Tailor",
-        bankAccount: "",
-        address: "",
+        state: "",
+        district: "",
+        city: "",
+        pincode: "",
         imageUrl: ""
-    });
+        });
+
     const [imageFile, setImageFile] = useState(null);
 
     useEffect(() => {
@@ -57,7 +60,7 @@ export default function StaffManagement() {
 
         try {
             await axios.post(BASE_URL, payload);
-            setFormData({ name: "", phone: "", role: "Tailor", bankAccount: "", address: "", imageUrl: "" });
+            setFormData({ name: "", phone: "", role: "Tailor",state: "",district: "",city: "",pincode: "", imageUrl: "" });
             setImageFile(null);
             setView("list");
         } catch (err) {
@@ -71,24 +74,105 @@ export default function StaffManagement() {
 
     if (view === "add") {
         return (
-            <form onSubmit={handleSubmit} className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-lg mx-auto mt-12">
-                <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Add Staff</h2>
-                <div className="space-y-4">
-                    <input type="text" placeholder="Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="border p-3 w-full rounded-lg" required />
-                    <input type="text" placeholder="Phone" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="border p-3 w-full rounded-lg" />
-                    <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} className="border p-3 w-full rounded-lg">
+                    <form
+                    onSubmit={handleSubmit}
+                    className="bg-white border border-indigo-100 shadow-xl rounded-2xl p-8 max-w-lg mx-auto mt-12"
+                    >
+                    <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">
+                        Add Staff
+                    </h2>
+                    <div className="space-y-4">
+                        <input
+                        type="text"
+                        placeholder="Name"
+                        value={formData.name}
+                        onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        required
+                        />
+                        <input
+                        type="text"
+                        placeholder="Phone"
+                        value={formData.phone}
+                        onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        />
+                        <select
+                        value={formData.role}
+                        onChange={(e) =>
+                            setFormData({ ...formData, role: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        >
                         <option value="Tailor">Tailor</option>
                         <option value="Helper">Helper</option>
-                    </select>
-                    <input type="text" placeholder="Bank Account" value={formData.bankAccount} onChange={e => setFormData({ ...formData, bankAccount: e.target.value })} className="border p-3 w-full rounded-lg" />
-                    <input type="text" placeholder="Address" value={formData.address} onChange={e => setFormData({ ...formData, address: e.target.value })} className="border p-3 w-full rounded-lg" />
-                    <input type="file" onChange={e => setImageFile(e.target.files[0])} className="border p-3 w-full rounded-lg" />
-                </div>
-                <div className="flex justify-between mt-8">
-                    <button type="submit" className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow">Add Staff</button>
-                    <button type="button" onClick={() => setView("list")} className="px-6 py-2 bg-gray-400 text-white rounded-lg">Cancel</button>
-                </div>
-            </form>
+                        </select>
+
+                        {/* Address broken down */}
+                        <input
+                        type="text"
+                        placeholder="State"
+                        value={formData.state}
+                        onChange={(e) =>
+                            setFormData({ ...formData, state: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        />
+                        <input
+                        type="text"
+                        placeholder="District"
+                        value={formData.district}
+                        onChange={(e) =>
+                            setFormData({ ...formData, district: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        />
+                        <input
+                        type="text"
+                        placeholder="City"
+                        value={formData.city}
+                        onChange={(e) =>
+                            setFormData({ ...formData, city: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        />
+                        <input
+                        type="text"
+                        placeholder="Pincode"
+                        value={formData.pincode}
+                        onChange={(e) =>
+                            setFormData({ ...formData, pincode: e.target.value })
+                        }
+                        className="border p-3 w-full rounded-lg"
+                        />
+
+                        <input
+                        type="file"
+                        onChange={(e) => setImageFile(e.target.files[0])}
+                        className="border p-3 w-full rounded-lg"
+                        />
+                    </div>
+                    <div className="flex justify-between mt-8">
+                        <button
+                        type="submit"
+                        className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow"
+                        >
+                        Add Staff
+                        </button>
+                        <button
+                        type="button"
+                        onClick={() => setView("list")}
+                        className="px-6 py-2 bg-gray-400 text-white rounded-lg"
+                        >
+                        Cancel
+                        </button>
+                    </div>
+                    </form>
+
         );
     }
 

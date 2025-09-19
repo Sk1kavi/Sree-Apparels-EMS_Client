@@ -272,31 +272,38 @@ export default function PieceTracking() {
                   <td className="border p-3 text-green-700 font-bold">
                     ₹{trunk.totalPaid || 0}
                   </td>
-                  <td className="border p-3 flex gap-2 justify-center flex-wrap">
-                    <button
-                      onClick={() => handleDispatch(trunk._id)}
-                      disabled={trunk.isDispatched}
-                      className={`px-4 py-1 rounded-lg font-bold shadow transition ${
-                        trunk.isDispatched
-                          ? "bg-gray-400 text-white cursor-not-allowed"
-                          : "bg-gradient-to-r from-green-400 to-green-600 text-white hover:scale-105"
-                      }`}
-                    >
-                      {trunk.isDispatched ? "Dispatched" : "Dispatch"}
-                    </button>
-                    <button
-                      onClick={() => handlePaymentUpdate(trunk._id)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
-                    >
-                      💰 Payment
-                    </button>
-                    <button
-                      onClick={() => handleGenerateBill(trunk._id)}
-                      className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
-                    >
-                      📄 Bill
-                    </button>
+                 <td className="border p-3 flex gap-2 justify-center flex-wrap">
+                    {/* Dispatch Button → only if NOT dispatched */}
+                    {!trunk.isDispatched && (
+                      <button
+                        onClick={() => handleDispatch(trunk._id)}
+                        className="px-4 py-1 rounded-lg font-bold shadow transition bg-gradient-to-r from-green-400 to-green-600 text-white hover:scale-105"
+                      >
+                        Dispatch
+                      </button>
+                    )}
+
+                    {/* Payment Button → only if payment NOT received */}
+                    {!trunk.paymentReceived && (
+                      <button
+                        onClick={() => handlePaymentUpdate(trunk._id)}
+                        className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
+                      >
+                        💰 Payment
+                      </button>
+                    )}
+
+                    {/* Bill Button → only if payment IS received */}
+                    {trunk.paymentReceived && (
+                      <button
+                        onClick={() => handleGenerateBill(trunk._id)}
+                        className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
+                      >
+                        📄 Bill
+                      </button>
+                    )}
                   </td>
+
                 </tr>
               ))}
             </tbody>
