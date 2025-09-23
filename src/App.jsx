@@ -1,47 +1,49 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import StaffManagement from "./pages/StaffManagement";
-import AttendanceManagement from "./pages/AttendanceManagement";
-import PieceTracking from "./pages/PieceTracking";
-import StitchingManagement from "./pages/StitchingManagement";
-import Home from "./pages/Home";
-import SalaryManagement from "./pages/SalaryManagement";
+import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import AdminApp from "./AdminApp";
+import StaffDetails from "./pages/StaffDetails";
 
-function App() {
+export default function App() {
+  const [role, setRole] = useState(localStorage.getItem("role"));
+  const [staffData, setStaffData] = useState(
+    JSON.parse(localStorage.getItem("staff"))
+  );
+
+  const handleLogin = (role, data) => {
+    localStorage.setItem("role", role);
+    setRole(role);
+
+    if (role === "staff") {
+      localStorage.setItem("staff", JSON.stringify(data));
+      setStaffData(data);
+    } else {
+      localStorage.setItem("admin", JSON.stringify(data));
+    }
+  };
+
   return (
     <Router>
-  {/* Use min-h-screen for the whole page */}
-  <div className="flex min-h-screen">
-    {/* Sidebar */}
-    <div className="w-64 bg-gray-800 text-white p-4">
-      <h2 className="text-xl font-bold mb-6">Sree Apparels EMS</h2>
-      <nav className="flex flex-col space-y-3">
-        <Link to="/staff" className="hover:bg-gray-700 p-2 rounded">👥 Staff</Link>
-        <Link to="/attendance" className="hover:bg-gray-700 p-2 rounded">🗓️ Attendance</Link>
-        <Link to="/stitching" className="hover:bg-gray-700 p-2 rounded">🧵 Stitching</Link>
-        <Link to="/pieces" className="hover:bg-gray-700 p-2 rounded">📦 Piece Tracking</Link>
-        <Link to="/salary" className="hover:bg-gray-700 p-2 rounded">💰 Salary</Link>
-        {/*<Link to="/analysis" className="hover:bg-gray-700 p-2 rounded">📊 Analysis</Link>*/}
-      </nav>
-    </div>
+      <Routes>
+        {/* Login */}
+        {!role && (
+          <Route path="/*" element={<Login onLogin={handleLogin} />} />
+        )}
 
-    {/* Main Content */}
-    <div className="flex-1 p-6 bg-gray-100">
-      <div className="min-h-screen">
-        <Routes>
-          <Route path="/staff" element={<StaffManagement />} />
-          <Route path="/attendance" element={<AttendanceManagement />} />
-          <Route path="/stitching" element={<StitchingManagement/>} />
-          <Route path="/pieces" element={<PieceTracking/>} />
-          <Route path="/salary" element={<SalaryManagement/>} />
-          <Route path="/analysis" element={<h1>Analysis Dashboard</h1>} />
-          <Route path="/" element={<Home/>} />
-        </Routes>
-      </div>
-    </div>
-  </div>
-</Router>
+        {/* Admin dashboard */}
+        {role === "admin" && <Route path="/*" element={<AdminApp />} />}
 
+        {/* StaffDetails */}
+        {role === "staff" && staffData && (
+          <Route
+            path="/*"
+            element={<StaffDetails staffId={staffData._id} />}
+          />
+        )}
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to={role ? "/" : "/login"} />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;

@@ -56,6 +56,10 @@ export default function StaffDetails({ staffId, goBack }) {
             console.error(err);
         }
     };
+const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/login"; // force redirect to login page
+};
 
     const fetchAnalysis = async () => {
         try {
@@ -366,6 +370,12 @@ export default function StaffDetails({ staffId, goBack }) {
                         className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-lg shadow"
                     >
                         Back
+                    </button>
+                     <button
+                        onClick={handleLogout}
+                        className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow"
+                    >
+                        Logout
                     </button>
                 </div>
             </div>
