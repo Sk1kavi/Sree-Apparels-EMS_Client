@@ -12,13 +12,13 @@ export default function Login({ onLogin }) {
     try {
       let res;
       if (role === "staff") {
-        res = await fetch("http://localhost:5000/api/auth/staff/login", {
+        res = await fetch("https://sree-apparels-ems.onrender.com/api/auth/staff/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone }),
         });
       } else {
-        res = await fetch("http://localhost:5000/api/auth/admin/login", {
+        res = await fetch("https://sree-apparels-ems.onrender.com/api/auth/admin/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
