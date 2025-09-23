@@ -5,6 +5,7 @@ import PieceTracking from "./pages/PieceTracking";
 import StitchingManagement from "./pages/StitchingManagement";
 import SalaryManagement from "./pages/SalaryManagement";
 import Home from "./pages/Home";
+import Analysis from "./pages/Analysis";
 
 export default function AdminApp() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function AdminApp() {
             <Link to="/stitching" className="hover:bg-gray-700 p-2 rounded">🧵 Stitching</Link>
             <Link to="/pieces" className="hover:bg-gray-700 p-2 rounded">📦 Piece Tracking</Link>
             <Link to="/salary" className="hover:bg-gray-700 p-2 rounded">💰 Salary</Link>
+            <Link to="/analysis" className="hover:bg-gray-700 p-2 rounded">📊 Analysis</Link>
           </nav>
         </div>
 
@@ -47,6 +49,7 @@ export default function AdminApp() {
           <Route path="/pieces" element={<PieceTracking />} />
           <Route path="/salary" element={<SalaryManagement />} />
           <Route path="/" element={<Home />} />
+          <Route path="/analysis" element={<Analysis />} />
         </Routes>
       </div>
     </div>
