@@ -7,6 +7,8 @@ const API_BASE = "https://sree-apparels-ems.onrender.com/api/pieces";
 
 export default function PieceTracking() {
   const [trunks, setTrunks] = useState([]);
+  const [paymentAmount, setPaymentAmount] = useState({});
+
   const [filters, setFilters] = useState({
     isDispatched: "All",
     paymentStatus: "All",
@@ -35,7 +37,6 @@ export default function PieceTracking() {
 
   useEffect(() => {
     fetchTrunks();
-    // eslint-disable-next-line
   }, []);
 
   // Add new trunk
@@ -67,18 +68,16 @@ export default function PieceTracking() {
   };
 
   // Update Payment
-  const handlePaymentUpdate = async (id) => {
-    const paymentAmount = prompt("Enter payment amount:");
-    if (!paymentAmount) return;
-    try {
-      await axios.put(`${API_BASE}/payment/${id}`, {
-        paymentAmount: Number(paymentAmount),
-      });
-      fetchTrunks();
-    } catch (err) {
-      console.error("Error updating payment:", err);
-    }
-  };
+  const handlePaymentUpdate = async (id, amount) => {
+  try {
+    await axios.put(`${API_BASE}/payment/${id}`, {
+      paymentAmount: amount, // send the validated amount
+    });
+    fetchTrunks(); // refresh data
+  } catch (err) {
+    console.error("Error updating payment:", err);
+  }
+};
 
   // Generate PDF Bill
   const handleGenerateBill = async (id) => {
@@ -282,16 +281,36 @@ export default function PieceTracking() {
                         Dispatch
                       </button>
                     )}
+<button
+  onClick={() => {
+    const remaining = trunk.expectedPayment - trunk.totalPaid;
+    const entered = prompt(`Enter amount (Remaining: ${remaining})`);
 
-                    {/* Payment Button → only if payment NOT received */}
-                    {!trunk.paymentReceived && (
-                      <button
-                        onClick={() => handlePaymentUpdate(trunk._id)}
-                        className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
-                      >
-                        💰 Payment
-                      </button>
-                    )}
+    if (entered === null) return; // User cancelled
+
+    const amount = Number(entered);
+
+    if (!entered || isNaN(amount)) {
+      alert("Please enter a numeric value.");
+      return;
+    }
+    if (amount <= 0) {
+      alert("Amount must be positive.");
+      return;
+    }
+    if (amount > remaining) {
+      alert(`Amount cannot exceed Remaining Balance (${remaining}).`);
+      return;
+    }
+
+    // ✅ Valid → call handler directly
+    handlePaymentUpdate(trunk._id, amount);
+  }}
+  className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
+>
+  💰 Payment
+</button>
+
 
                     {/* Bill Button → only if payment IS received */}
                     {trunk.paymentReceived && (
