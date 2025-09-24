@@ -32,7 +32,7 @@ export default function AttendanceManagement() {
         setIsStaff(true);
         const mapped = {};
         res.data.data.forEach((s) => {
-          mapped[s._id] = "Absent";
+          mapped[s._id] = "Present";
         });
         setAttendance(mapped);
         setStaff(res.data.data);
