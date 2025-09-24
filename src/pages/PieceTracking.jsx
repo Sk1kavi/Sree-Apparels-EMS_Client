@@ -79,100 +79,122 @@ export default function PieceTracking() {
   }
 };
 
-  // Generate PDF Bill
-  const handleGenerateBill = async (id) => {
-    try {
-      const res = await axios.get(`${API_BASE}/${id}`);
-      const trunk = res.data;
-      const doc = new jsPDF();
+// Generate PDF Bill
+const handleGenerateBill = async (id) => {
+  try {
+    const res = await axios.get(`${API_BASE}/${id}`);
+    const trunk = res.data;
+    const doc = new jsPDF();
 
-      // Header
-      doc.setFontSize(18);
-      doc.text("SREE APPARELS", 105, 20, { align: "center" });
-      doc.setFontSize(12);
-      doc.text("Official Invoice", 105, 28, { align: "center" });
-      doc.line(20, 32, 190, 32);
+    // Header
+    doc.setFontSize(18);
+    doc.text("SREE APPARELS", 105, 20, { align: "center" });
 
-      // Vendor Info
-      doc.setFontSize(11);
-      doc.text(`Vendor: ${trunk.vendor}`, 20, 45);
-      doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, 45);
+    doc.setFontSize(12);
+    doc.text("Official Invoice", 105, 28, { align: "center" });
 
-      // Trunk Details Table
-      doc.setFontSize(12);
-      doc.text("Bundle Details:", 20, 60);
+    
+   // Company Details - Left and Right alignment
+doc.setFontSize(10);
+doc.text("Email: sreeapparels.gbi@gmail.com", 20, 36);
+doc.text("Phone: 9344931717", 20, 41);
+
+const addressLines = [
+  "11A, Jawaharlal Nehru Street,",
+  "Amman Mess opposite,",
+  "Erode main road, Gobi.",
+];
+let addrY = 36;
+addressLines.forEach((line) => {
+  doc.text(line, 190, addrY, { align: "right" });
+  addrY += 5;
+});
+
+// Horizontal line below header
+doc.line(20, 51, 190, 51); // 51 = bottom of last line of address/phone
+
+    // Vendor Info (placed below company details)
+    doc.setFontSize(11);
+    const vendorY = 56;
+    doc.text(`Vendor: ${trunk.vendor}`, 20, vendorY);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 150, vendorY);
+
+    // Trunk Details Table
+    doc.setFontSize(12);
+    doc.text("Bundle Details:", 20, vendorY + 13);
+    autoTable(doc, {
+      startY: vendorY + 18, // start table below vendor info
+      head: [
+        [
+          "Bundle No",
+          "Item Type",
+          "Quantity",
+          "Expected Payment",
+          "Total Paid",
+          "Received Date",
+          "Dispatched Date",
+        ],
+      ],
+      body: [
+        [
+          trunk.trunkNumber,
+          trunk.itemType,
+          trunk.quantity,
+          `₹${trunk.expectedPayment}`,
+          `₹${trunk.totalPaid || 0}`,
+          new Date(trunk.receivedDate).toLocaleDateString(),
+          trunk.dispatchedDate
+            ? new Date(trunk.dispatchedDate).toLocaleDateString()
+            : "—",
+        ],
+      ],
+      theme: "grid",
+      styles: { halign: "center" },
+    });
+
+    // Partial Payments Table
+    const startYPartial = doc.lastAutoTable.finalY + 10;
+    doc.text("Partial Payments:", 20, startYPartial);
+
+    const paymentBody = trunk.payments.map((p) => [
+      new Date(p.date).toLocaleDateString(),
+      `₹${p.amount}`,
+    ]);
+
+    if (paymentBody.length === 0) {
+      doc.text("No payments received yet.", 20, startYPartial + 10);
+    } else {
       autoTable(doc, {
-        startY: 65,
-        head: [
-          [
-            "Bundle No",
-            "Item Type",
-            "Quantity",
-            "Expected Payment",
-            "Total Paid",
-            "Received Date",
-            "Dispatched Date",
-          ],
-        ],
-        body: [
-          [
-            trunk.trunkNumber,
-            trunk.itemType,
-            trunk.quantity,
-            `₹${trunk.expectedPayment}`,
-            `₹${trunk.totalPaid || 0}`,
-            new Date(trunk.receivedDate).toLocaleDateString(),
-            trunk.dispatchedDate
-              ? new Date(trunk.dispatchedDate).toLocaleDateString()
-              : "—",
-          ],
-        ],
+        startY: startYPartial + 5,
+        head: [["Payment Date", "Amount"]],
+        body: paymentBody,
         theme: "grid",
         styles: { halign: "center" },
       });
-
-      // Partial Payments Table
-      const startYPartial = doc.lastAutoTable.finalY + 10;
-      doc.text("Partial Payments:", 20, startYPartial);
-
-      const paymentBody = trunk.payments.map((p) => [
-        new Date(p.date).toLocaleDateString(),
-        `₹${p.amount}`,
-      ]);
-
-      if (paymentBody.length === 0) {
-        doc.text("No payments received yet.", 20, startYPartial + 10);
-      } else {
-        autoTable(doc, {
-          startY: startYPartial + 5,
-          head: [["Payment Date", "Amount"]],
-          body: paymentBody,
-          theme: "grid",
-          styles: { halign: "center" },
-        });
-      }
-
-      // Footer
-      const finalY =
-        (paymentBody.length > 0 ? doc.lastAutoTable.finalY : startYPartial + 20) +
-        10;
-      doc.setFontSize(12);
-      const pending = trunk.expectedPayment - (trunk.totalPaid || 0);
-      if (pending <= 0) {
-        doc.setTextColor(0, 128, 0);
-        doc.text("✅ Payment Completed. Thank you!", 20, finalY);
-      } else {
-        doc.setTextColor(200, 0, 0);
-        doc.text(`⚠ Pending Amount: ₹${pending}`, 20, finalY);
-      }
-      doc.setTextColor(0, 0, 0);
-      doc.text("Authorized Signature: ____________________", 20, finalY + 30);
-
-      doc.save(`Bill_${trunk.trunkNumber}.pdf`);
-    } catch (err) {
-      console.error("Error generating bill:", err);
     }
-  };
+
+    // Footer
+    const finalY =
+      (paymentBody.length > 0 ? doc.lastAutoTable.finalY : startYPartial + 20) +
+      10;
+    doc.setFontSize(12);
+    const pending = trunk.expectedPayment - (trunk.totalPaid || 0);
+    if (pending <= 0) {
+      doc.setTextColor(0, 128, 0);
+      doc.text("✅ Payment Completed. Thank you!", 20, finalY);
+    } else {
+      doc.setTextColor(200, 0, 0);
+      doc.text(`⚠ Pending Amount: ₹${pending}`, 20, finalY);
+    }
+
+    doc.setTextColor(0, 0, 0);
+    doc.text("Authorized Signature: ____________________", 20, finalY + 30);
+
+    doc.save(`Bill_${trunk.trunkNumber}.pdf`);
+  } catch (err) {
+    console.error("Error generating bill:", err);
+  }
+};
 
   // Row coloring
   const getRowColor = (trunk) => {
@@ -281,36 +303,37 @@ export default function PieceTracking() {
                         Dispatch
                       </button>
                     )}
-<button
-  onClick={() => {
-    const remaining = trunk.expectedPayment - trunk.totalPaid;
-    const entered = prompt(`Enter amount (Remaining: ${remaining})`);
+                    {!trunk.paymentReceived && (
+                    <button
+                      onClick={() => {
+                        const remaining = trunk.expectedPayment - trunk.totalPaid;
+                        const entered = prompt(`Enter amount (Remaining: ${remaining})`);
 
-    if (entered === null) return; // User cancelled
+                        if (entered === null) return; // User cancelled
 
-    const amount = Number(entered);
+                        const amount = Number(entered);
 
-    if (!entered || isNaN(amount)) {
-      alert("Please enter a numeric value.");
-      return;
-    }
-    if (amount <= 0) {
-      alert("Amount must be positive.");
-      return;
-    }
-    if (amount > remaining) {
-      alert(`Amount cannot exceed Remaining Balance (${remaining}).`);
-      return;
-    }
+                        if (!entered || isNaN(amount)) {
+                          alert("Please enter a numeric value.");
+                          return;
+                        }
+                        if (amount <= 0) {
+                          alert("Amount must be positive.");
+                          return;
+                        }
+                        if (amount > remaining) {
+                          alert(`Amount cannot exceed Remaining Balance (${remaining}).`);
+                          return;
+                        }
 
-    // ✅ Valid → call handler directly
-    handlePaymentUpdate(trunk._id, amount);
-  }}
-  className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
->
-  💰 Payment
-</button>
-
+                        // ✅ Valid → call handler directly
+                        handlePaymentUpdate(trunk._id, amount);
+                      }}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-4 py-1 rounded-lg font-bold shadow hover:scale-105 transition"
+                    >
+                      💰 Payment
+                    </button>
+                    )}
 
                     {/* Bill Button → only if payment IS received */}
                     {trunk.paymentReceived && (
