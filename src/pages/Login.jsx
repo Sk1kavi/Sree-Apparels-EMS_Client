@@ -1,14 +1,36 @@
 import { useState } from "react";
+import { User, Lock, Phone, Mail, ArrowRight, Eye, EyeOff } from "lucide-react";
 
-export default function Login({ onLogin }) {
+// Animated Background Component
+const AnimatedBackground = () => (
+  <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div className="absolute -top-40 -right-32 w-96 h-96 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-600/20 blur-3xl animate-pulse"></div>
+    <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-gradient-to-br from-pink-400/20 to-orange-600/20 blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-gradient-to-br from-green-400/10 to-blue-600/10 blur-2xl animate-bounce"></div>
+  </div>
+);
+
+// Company Watermark Component
+const CompanyWatermark = () => (
+  <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-0 select-none">
+    <div className="text-9xl font-black text-gray-900 transform -rotate-12 opacity-5 transition-opacity duration-2000">
+      SREE APPARELS
+    </div>
+  </div>
+);
+
+export default function ModernLogin({ onLogin }) {
   const [role, setRole] = useState("staff");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       let res;
       if (role === "staff") {
@@ -35,96 +57,175 @@ export default function Login({ onLogin }) {
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-indigo-200">
-      <div className="w-full max-w-md bg-white/90 shadow-2xl rounded-2xl p-8 border border-indigo-100">
-        <div className="flex flex-col items-center mb-6">
-          <div className="bg-indigo-600 rounded-full p-3 mb-2 shadow-lg">
-            <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
-              <path
-                fill="#fff"
-                d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.418 0-8 2.239-8 5v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1c0-2.761-3.582-5-8-5Z"
-              />
-            </svg>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden flex items-center justify-center p-6">
+      <AnimatedBackground />
+      <CompanyWatermark />
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Company Header */}
+        <div className="text-center mb-8 animate-fadeIn">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl shadow-2xl mb-6 transform hover:scale-110 transition-all duration-500">
+            <User className="text-white" size={32} />
           </div>
-          <h2 className="text-3xl font-extrabold text-indigo-700 mb-1">Welcome Back</h2>
-          <p className="text-gray-500 text-sm">Sign in to your account</p>
+          <h1 className="text-4xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            SREE APPARELS
+          </h1>
+          <p className="text-gray-600 font-medium">Employee Management System</p>
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <div className="flex justify-center mb-6">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-l-lg font-semibold transition-colors duration-200 ${
-              role === "staff" ? "bg-indigo-600 text-white" : "bg-gray-100 text-indigo-600 hover:bg-indigo-50"
-            }`}
-            onClick={() => setRole("staff")}
-          >
-            Staff
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-r-lg font-semibold transition-colors duration-200 ${
-              role === "admin" ? "bg-indigo-600 text-white" : "bg-gray-100 text-indigo-600 hover:bg-indigo-50"
-            }`}
-            onClick={() => setRole("admin")}
-          >
-            Admin
-          </button>
+        {/* Login Card */}
+        <div className="bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 animate-slideUp">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome Back</h2>
+            <p className="text-gray-600">Sign in to access your dashboard</p>
+          </div>
+
+          {/* Role Toggle */}
+          <div className="flex bg-gray-100 rounded-2xl p-1 mb-8">
+            <button
+              type="button"
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                role === "staff" 
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105" 
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+              onClick={() => setRole("staff")}
+            >
+              <User size={18} /> Staff
+            </button>
+            <button
+              type="button"
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
+                role === "admin" 
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105" 
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+              onClick={() => setRole("admin")}
+            >
+              <Lock size={18} /> Admin
+            </button>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            {role === "staff" ? (
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">Mobile Number</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Phone className="text-gray-400" size={20} />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    required
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2">Email Address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="text-gray-400" size={20} />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2">Password</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock className="text-gray-400" size={20} />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 animate-shake">
+                <p className="text-red-600 text-sm font-medium">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  Sign In <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="text-center mt-8 pt-6 border-t border-gray-200">
+            <p className="text-gray-500 text-sm">Secure access to your workspace</p>
+          </div>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          {role === "staff" ? (
-            <div>
-              <label className="block text-gray-700 font-medium mb-1">Mobile Number</label>
-              <input
-                type="text"
-                placeholder="Enter Mobile Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full border border-indigo-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                required
-              />
-            </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Email</label>
-                <input
-                  type="email"
-                  placeholder="Enter Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-indigo-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-1">Password</label>
-                <input
-                  type="password"
-                  placeholder="Enter Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-indigo-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200 text-white py-3 rounded-lg font-semibold shadow-md"
-          >
-            Login
-          </button>
-        </form>
+        {/* Contact Info */}
+        <div className="text-center mt-8 text-gray-600 text-sm animate-fadeIn" style={{animationDelay: '0.5s'}}>
+          <p>Need help? Contact us at</p>
+          <p className="font-semibold">sreeapparels.gbi@gmail.com</p>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(50px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        .animate-slideUp { animation: slideUp 0.8s ease-out forwards; opacity: 0; }
+        .animate-shake { animation: shake 0.5s ease-in-out; }
+      `}</style>
     </div>
   );
 }
