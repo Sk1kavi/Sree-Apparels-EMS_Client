@@ -579,7 +579,7 @@ export default function StaffDetails({ staffId, goBack }) {
                     : "text-slate-600 hover:text-indigo-600 hover:bg-indigo-50"
                 }`}
               >
-                <DollarSign className="w-5 h-5" />
+                <IndianRupee className="w-5 h-5" />
                 Salary
               </button>
               <button
@@ -718,7 +718,7 @@ export default function StaffDetails({ staffId, goBack }) {
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 animate-in fade-in-0 slide-in-from-right-4 duration-500">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold text-slate-800 flex items-center gap-3">
-          <DollarSign className="w-8 h-8 text-green-500" />
+          <IndianRupee className="w-8 h-8 text-green-500" />
           Salary Analysis - {year}
         </h2>
       </div>
