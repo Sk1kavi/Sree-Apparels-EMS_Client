@@ -641,7 +641,7 @@ export default function StaffDetails({ staffId, goBack }) {
       </div>
 
       {/* View Mode Selector (for attendance tab) */}
-      {activeTab === "attendance" && (
+      {/* {activeTab === "attendance" && (
         <select 
           value={viewMode} 
           onChange={e => setViewMode(e.target.value)} 
@@ -651,7 +651,7 @@ export default function StaffDetails({ staffId, goBack }) {
           <option value="Weekly">Weekly View</option>
           <option value="Monthly">Monthly View</option>
         </select>
-      )}
+      )} */}
 
       {/* Summary Cards */}
       <div className="flex items-center gap-4 text-sm font-medium">

@@ -202,7 +202,7 @@ export default function Analysis() {
               ))}
             </select>
           </div>
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20">
+          {/* <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-xl p-2 border border-white/20">
             <Filter className="w-4 h-4 text-green-400" />
             <select 
               value={viewMode} 
@@ -213,7 +213,7 @@ export default function Analysis() {
               <option value="Weekly" className="bg-gray-800 text-white">Weekly View</option>
               <option value="Monthly" className="bg-gray-800 text-white">Monthly View</option>
             </select>
-          </div>
+          </div> */}
         </div>
 
         {/* Charts */}
