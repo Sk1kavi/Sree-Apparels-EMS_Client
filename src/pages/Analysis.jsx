@@ -181,10 +181,14 @@ export default function ReportsAnalysis() {
           }
 
           if (selectedReportTypes.includes('pieceTracking')) {
-            // Placeholder - adjust endpoint as needed
+            const res = await axios.get(`http://localhost:5000/api/pieces?year=${year}&month=${monthStr}`);
             if (!data.pieceTracking) data.pieceTracking = [];
-            // Add your piece tracking API call here
+            data.pieceTracking.push(...res.data.map(p => ({
+              ...p,
+              period: key,
+            })));
           }
+
         }
       }
 
@@ -197,32 +201,49 @@ export default function ReportsAnalysis() {
     }
   };
 
-  const exportToExcel = () => {
-    if (!reportData) return;
-    
-    let csvContent = "data:text/csv;charset=utf-8,";
-    
-    Object.keys(reportData).forEach(reportType => {
-      csvContent += `\n${reportType.toUpperCase()} REPORT\n`;
-      const data = reportData[reportType];
-      if (data.length > 0) {
-        const headers = Object.keys(data[0]);
-        csvContent += headers.join(",") + "\n";
-        data.forEach(row => {
-          csvContent += headers.map(h => row[h]).join(",") + "\n";
-        });
-      }
-      csvContent += "\n";
+ const exportToExcel = () => {
+  if (!reportData || Object.keys(reportData).length === 0) return;
+  console.log(reportData); // debug: see the actual data
+
+  let csvContent = "";
+
+  Object.keys(reportData).forEach((reportType) => {
+    const rows = Array.isArray(reportData[reportType]) ? reportData[reportType] : [];
+    if (rows.length === 0) return;
+
+    // Report title
+    csvContent += `${reportType.toUpperCase()} REPORT\n`;
+
+    // Get headers from first row
+    const columns = Object.keys(rows[0] || {});
+    csvContent += columns.join(",") + "\n";
+
+    // Add rows
+    rows.forEach((row) => {
+      const rowValues = columns.map((col) => {
+        let cell = row[col];
+        if (cell === null || cell === undefined) cell = "";
+        // escape quotes and commas
+        if (typeof cell === "string" && (cell.includes(",") || cell.includes('"'))) {
+          cell = `"${cell.replace(/"/g, '""')}"`;
+        }
+        return cell;
+      });
+      csvContent += rowValues.join(",") + "\n";
     });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `report_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    csvContent += "\n"; // extra line after each report
+  });
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `report_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 const exportToPDF = (reportData) => {
   if (!reportData || Object.keys(reportData).length === 0) {
@@ -232,7 +253,7 @@ const exportToPDF = (reportData) => {
 
   const doc = new jsPDF();
 
-  // --- HEADER ---
+  // --- HEADER (ONLY FIRST PAGE) ---
   doc.setFontSize(18);
   doc.text("SREE APPARELS", 105, 20, { align: "center" });
 
@@ -248,18 +269,18 @@ const exportToPDF = (reportData) => {
     "Amman Mess opposite,",
     "Erode main road, Gobi."
   ];
+
   let y = 36;
   addrLines.forEach(line => {
     doc.text(line, 190, y, { align: "right" });
     y += 5;
   });
 
-  // Move line further down to give space below header
   doc.setLineWidth(0.5);
-  doc.line(15, 50, 195, 50); // moved from 46 -> 50
+  doc.line(15, 50, 195, 50); // header line
 
   // --- TABLES ---
-  let startY = 55; // start below the line
+  let startY = 55; // below header
 
   Object.keys(reportData).forEach((reportType) => {
     const rows = Array.isArray(reportData[reportType]) ? reportData[reportType] : [];
@@ -268,13 +289,10 @@ const exportToPDF = (reportData) => {
     // Report type title
     doc.setFontSize(12);
     doc.text(`${reportType} Data`, 15, startY);
-    startY += 6; // a bit of space after title
+    startY += 6;
 
-    // Column headers
     const columns = Object.keys(rows[0] || {});
     const head = [columns.map(col => col.charAt(0).toUpperCase() + col.slice(1))];
-
-    // Table body - ALL rows
     const body = rows.map(row => columns.map(col => row[col]));
 
     autoTable(doc, {
@@ -286,23 +304,10 @@ const exportToPDF = (reportData) => {
       margin: { left: 15, right: 15 },
       theme: "grid",
       didDrawPage: (data) => {
-        // Repeat header on each new page if needed
-        if (data.pageNumber > 1) {
-          doc.setFontSize(18);
-          doc.text("SREE APPARELS", 105, 20, { align: "center" });
-          doc.setFontSize(12);
-          doc.text("Official Report", 105, 28, { align: "center" });
-          doc.setFontSize(10);
-          doc.text("Email: sreeapparels.gbi@gmail.com", 20, 36);
-          doc.text("Phone: 9344931717", 20, 41);
-          let yHeader = 36;
-          addrLines.forEach(line => {
-            doc.text(line, 190, yHeader, { align: "right" });
-            yHeader += 5;
-          });
-          doc.setLineWidth(0.5);
-          doc.line(15, 50, 195, 50);
-        }
+        // OPTIONAL: add page numbers
+        const pageNumber = doc.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(`Page ${pageNumber}`, 190, 290, { align: "right" });
       }
     });
 
@@ -318,7 +323,6 @@ const exportToPDF = (reportData) => {
   // --- SAVE PDF ---
   doc.save(`report_${Date.now()}.pdf`);
 };
-
 
 
   const StatCard = ({ icon: Icon, title, value, color, delay = 0 }) => (
@@ -703,41 +707,115 @@ const exportToPDF = (reportData) => {
                       </ResponsiveContainer>
                     </div>
                   )}
+                 {reportData.pieceTracking && reportData.pieceTracking.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-700 mb-4">Piece Tracking Report</h3>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={reportData.pieceTracking.slice(0, 20)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="trunkNumber"
+                            angle={-45}
+                            textAnchor="end"
+                            height={100}
+                            tick={{ fontSize: 10 }}
+                          />
+                          <YAxis
+                            yAxisId="left"
+                            label={{ value: 'Quantity', angle: -90, position: 'insideLeft', offset: 0 }}
+                          />
+                          <YAxis
+                            yAxisId="right"
+                            orientation="right"
+                            label={{ value: 'Total Paid', angle: -90, position: 'insideRight', offset: 0 }}
+                          />
+                          <Tooltip />
+                          <Legend />
+                          <Bar yAxisId="left" dataKey="quantity" fill="#3B82F6" name="Quantity" />
+                          <Bar yAxisId="right" dataKey="totalPaid" fill="#10B981" name="Total Paid" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
 
                 {/* Data Tables */}
                 <div className="mt-8 space-y-6">
                   {Object.keys(reportData).map(reportType => (
                     <div key={reportType} className="bg-gray-50 rounded-xl p-6">
-                      <h3 className="text-lg font-bold text-gray-800 mb-4 capitalize">{reportType} Data</h3>
+                      <h3 className="text-lg font-bold text-gray-800 mb-4 capitalize">
+                        {reportType} Data
+                      </h3>
+
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-200">
                             <tr>
-                              {reportData[reportType].length > 0 && Object.keys(reportData[reportType][0]).map(key => (
-                                <th key={key} className="px-4 py-2 text-left font-semibold capitalize">{key}</th>
-                              ))}
+                              {reportData[reportType].length > 0 &&
+                                Object.keys(reportData[reportType][0]).map(key => (
+                                  <th
+                                    key={key}
+                                    className="px-4 py-2 text-left font-semibold capitalize"
+                                  >
+                                    {key}
+                                  </th>
+                                ))}
                             </tr>
                           </thead>
+
                           <tbody>
                             {reportData[reportType].slice(0, 10).map((row, idx) => (
-                              <tr key={idx} className="border-b border-gray-200 hover:bg-gray-100">
-                                {Object.values(row).map((val, i) => (
-                                  <td key={i} className="px-4 py-2">{val}</td>
+                              <tr
+                                key={idx}
+                                className="border-b border-gray-200 hover:bg-gray-100"
+                              >
+                                {Object.entries(row).map(([key, val], i) => (
+                                  <td key={i} className="px-4 py-2">
+                                    {reportType === "pieceTracking" ? (
+                                      // === Custom Display for Piece Tracking ===
+                                      key === "isDispatched" || key === "paymentReceived" ? (
+                                        val ? "✅ Yes" : "❌ No"
+                                      ) : key === "receivedDate" || key === "dispatchedDate" ? (
+                                        val ? new Date(val).toLocaleDateString("en-GB") : "—"
+                                      ) : (
+                                        val?.toString() || "—"
+                                      )
+                                    ) : Array.isArray(val) ? (
+                                      val.length > 0
+                                        ? val
+                                            .map(v =>
+                                              typeof v === "object"
+                                                ? Object.entries(v)
+                                                    .map(([k, vv]) => `${k}: ${vv}`)
+                                                    .join(", ")
+                                                : v
+                                            )
+                                            .join(" | ")
+                                        : "—"
+                                    ) : typeof val === "object" && val !== null ? (
+                                      Object.entries(val)
+                                        .map(([k, vv]) => `${k}: ${vv}`)
+                                        .join(", ")
+                                    ) : (
+                                      val?.toString() || "—"
+                                    )}
+                                  </td>
                                 ))}
                               </tr>
                             ))}
                           </tbody>
                         </table>
-                        {reportData[reportType].length > 10 && (
-                          <p className="text-center text-gray-500 mt-4">
-                            Showing 10 of {reportData[reportType].length} entries
-                          </p>
-                        )}
-                      </div>
+
+                      {reportData[reportType].length > 10 && (
+                        <p className="text-center text-gray-500 mt-4">
+                          Showing 10 of {reportData[reportType].length} entries
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+              </div>
+
               </div>
             )}
           </div>
