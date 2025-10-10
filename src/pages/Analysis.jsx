@@ -181,7 +181,7 @@ export default function ReportsAnalysis() {
           }
 
           if (selectedReportTypes.includes('pieceTracking')) {
-            const res = await axios.get(`${BASE_URL}/api/pieces?year=${year}&month=${monthStr}`);
+            const res = await axios.get(`${BASE_URL}/pieces?year=${year}&month=${monthStr}`);
             if (!data.pieceTracking) data.pieceTracking = [];
             data.pieceTracking.push(...res.data.map(p => ({
               ...p,
